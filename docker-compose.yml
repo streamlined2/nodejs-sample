@@ -12,7 +12,7 @@ services:
     environment:
       - NODE_ENV=prod
   db:
-    image: mongo:5.0.14
+    image: bitnami/mongodb:7.0.9
     ports:
       - '27018:27017'
     volumes:
