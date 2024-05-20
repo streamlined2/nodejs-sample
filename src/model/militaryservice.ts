@@ -2,7 +2,7 @@ import { Period } from './period';
 
 enum Rank { Private, Sergeant, Corporal, Lieutenant, Major, Colonel, General };
 
-class MilitaryService extends Period {
+export class MilitaryService extends Period {
     constructor(
         personId: number,
         start: Date,

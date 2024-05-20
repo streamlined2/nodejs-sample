@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export abstract class Period extends Document {
+export class Period extends Document {
     constructor(
         private personId: number,
         private start: Date,
-        private finish: Date,
-        private remark: string
+        private finish: Date = new Date(Date.UTC(9999, 1, 1)),
+        private remark: string = ""
     ) {
         super();
         this.personId = personId;
