@@ -10,6 +10,6 @@ router.get('/ping', ping);
 
 router.use('/groups', groups);
 router.use('/students', students);
-router.use('/periods', periods);
+router.use('/api/period', periods);
 
 export default router;
