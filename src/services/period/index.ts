@@ -4,8 +4,9 @@ import { InvalidDataError } from 'src/system/invalidDataError';
 import { minDate, PeriodSaveDto, remarkMinLength } from 'src/dto/period/periodSaveDto';
 import log4js from 'log4js';
 import httpStatus from 'http-status';
+import { getConsulValueByKey } from 'src/app';
 
-const personFetchEndpoint: string = 'http://localhost:8080/api/person/';
+const defaultPersonEndpoint = 'http://localhost:8080/api/person/';
 
 export const savePeriod = async (
     dto: PeriodSaveDto): Promise<string> => {
@@ -45,6 +46,7 @@ const checkInputData = async (dto: PeriodSaveDto): Promise<void> => {
 
 const personIsPresent = async (dto: PeriodSaveDto): Promise<boolean> => {
     try {
+        const personFetchEndpoint: string = await getConsulValueByKey('endpoint.person', defaultPersonEndpoint);
         const response = await fetch(personFetchEndpoint + dto.getPersonId());
         return response.status == httpStatus.OK;
     } catch (error) {

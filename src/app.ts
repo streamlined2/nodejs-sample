@@ -17,12 +17,20 @@ const consulServer = new Consul(config.consul.server[env] as ConsulOptions);
 const prefix = `config/${config.consul.service.name}`;
 
 type ConsulResult = {
-	Value: string | number,
+  Value: string | number,
 };
 
 const getConsulValue = async (key: string) => {
   const result: ConsulResult = await consulServer.kv.get(`${prefix}/${key}`);
   return result?.Value;
+};
+
+export const getConsulValueByKey = async (key: string, defaultValue: string): Promise<string> => {
+  const value = await getConsulValue(`${env}/${key}`) as string;
+  if (value == null || value == undefined) {
+    return defaultValue;
+  }
+  return value as string;
 };
 
 export default async () => {
