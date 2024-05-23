@@ -7,41 +7,12 @@ export type PeriodType =
     "Entrepreneurship" |
     "CareerBreak";
 
-export class Period extends Document {
-    constructor(
-        private personId: number,
-        private periodType: PeriodType,
-        private start: Date,
-        private finish: Date = new Date(Date.UTC(9999, 1, 1)),
-        private remark: string = ""
-    ) {
-        super();
-        this.personId = personId;
-        this.periodType = periodType;
-        this.start = start;
-        this.finish = finish;
-        this.remark = remark;
-    }
-
-    public getPersonId(): number {
-        return this.personId;
-    }
-
-    public getPeriodType(): PeriodType {
-        return this.periodType;
-    }
-
-    public getStart(): Date {
-        return this.start;
-    }
-
-    public getFinish(): Date {
-        return this.finish;
-    }
-
-    public getRemark(): string {
-        return this.remark;
-    }
+export interface Period extends Document {
+    personId: number;
+    periodType: PeriodType;
+    start: Date;
+    finish: Date;
+    remark: string;
 }
 
 const schema = new Schema({
