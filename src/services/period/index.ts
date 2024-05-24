@@ -8,8 +8,29 @@ import httpStatus from 'http-status';
 import { getConsulValueByKey } from 'src/app';
 import { PeriodDto } from 'src/dto/period/periodDto';
 import { PeriodQueryDto } from 'src/dto/period/periodQueryDto';
+import { PeriodCountRequestDto } from 'src/dto/period/periodCountRequestDto';
 
 const defaultPersonEndpoint = 'http://localhost:8080/api/person/';
+const firstCount = 0;
+const numberOfCounts = 1000;
+
+export const getCountsForPersonIds = async (requestDto: PeriodCountRequestDto): Promise<Record<string, number>> => {
+    let personIdCounts = {};
+    const query = await PeriodModel.aggregate().
+        match({ personId: { $in: requestDto.getPersonIds() } }).
+        group({ _id: "$personId", count: { $count: {} } }).
+        sort({ "_id": 1 }
+        ).skip(firstCount).limit(numberOfCounts);
+    query.
+        reduce((_, { _id, count }) => {
+            personIdCounts = {
+                ...personIdCounts,
+                [_id]: count
+            };
+        }, {}
+        );
+    return personIdCounts as Record<string, number>;
+};
 
 export const getPeriodsForPersonSortedByTimeDesc = async (queryDto: PeriodQueryDto): Promise<PeriodDto[]> => {
     const periodList = await PeriodModel

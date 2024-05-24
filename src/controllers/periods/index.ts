@@ -5,6 +5,8 @@ import { savePeriod as savePeriodApi, getPeriodsForPersonSortedByTimeDesc as get
 import httpStatus from 'http-status';
 import { InternalError } from 'src/system/internalError';
 import { PeriodQueryDto } from 'src/dto/period/periodQueryDto';
+import { getCountsForPersonIds as getCountsForPersonIdsApi } from 'src/services/period';
+import { PeriodCountRequestDto } from 'src/dto/period/periodCountRequestDto';
 
 export const savePeriod = async (request: Request, response: Response) => {
     try {
@@ -35,4 +37,16 @@ const createPeriodQueryDto = (request: Request): PeriodQueryDto => {
         Number(request.params.personId),
         Number(request.query.from),
         Number(request.query.size))
+};
+
+export const getCountsForPersonIds = async (request: Request, response: Response) => {
+    try {
+        const requestDto = new PeriodCountRequestDto(request.body as PeriodCountRequestDto);
+        const periodCounts = await getCountsForPersonIdsApi(requestDto);
+        response.status(httpStatus.OK).send(periodCounts);
+    } catch (error) {
+        const { message, status } = new InternalError(error);
+        log4js.getLogger().error('Error counting periods by person ids', error);
+        response.status(status).send({ message });
+    }
 };
