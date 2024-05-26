@@ -5,6 +5,7 @@ import mongoSetup from '../mongoSetup';
 import PeriodModel from 'src/model/period';
 import { PeriodSaveDto } from 'src/dto/period/periodSaveDto';
 import * as periodService from 'src/services/period';
+import httpStatus from 'http-status';
 
 const { expect } = chai;
 
@@ -58,6 +59,9 @@ describe('Period Service', () => {
     });
 
     it("savePeriod should create new period and return it's id", (done) => {
+        const fetchStub = sandbox.stub(global, 'fetch');
+        fetchStub.resolves(mockAPIResponse());
+
         const periodDto: PeriodSaveDto = {
             personId: personId,
             periodType: "MilitaryService",
@@ -81,6 +85,16 @@ describe('Period Service', () => {
             .catch((error: Error) => done(error));
     });
 
+    const mockAPIResponse = (body = {}) => {
+        return new global.Response(
+            JSON.stringify(body),
+            {
+                status: httpStatus.OK,
+                headers: { 'Content-type': 'application/json' }
+            }
+        );
+    };
+
     it('getPeriodsForPersonSortedByTimeDesc should provide a list of periods for given personId sorted by start date in descending order', (done) => {
         const resultingPeriods = [period2, period1].map(periodService.toPeriodDto);
         periodService.getPeriodsForPersonSortedByTimeDesc({ personId: personId, from: 0, size: 10 })
@@ -95,9 +109,7 @@ describe('Period Service', () => {
     it('getCountsForPersonIds should fetch list of counts for every provided personId sorted by person id date in ascending order', (done) => {
         periodService.getCountsForPersonIds({ personIds: [personId, otherPersonId] })
             .then((queryResult) => {
-                expect(queryResult.length).to.equal(2);
-                expect(queryResult[personId]).to.eql(2);
-                expect(queryResult[otherPersonId]).to.eql(1);
+                expect(queryResult).to.eql({ [personId]: 2, [otherPersonId]: 1 });
                 done();
             })
             .catch((error: Error) => done(error));
