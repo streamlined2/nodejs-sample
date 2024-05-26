@@ -1,7 +1,7 @@
 export class PeriodQueryDto {
-    public personId: number;
-    public from: number = 0;
-    public size: number = 10;
+    personId: number;
+    from: number = 0;
+    size: number = 10;
 
     constructor(personId: number, from?: number, size?: number) {
         this.personId = personId;
