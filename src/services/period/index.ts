@@ -68,13 +68,13 @@ const validatePeriod = async (dto: PeriodSaveDto): Promise<void> => {
         throw new InvalidDataError(`Person id should be valid positive number`);
     }
     if (!isPeriodTypeValid(dto)) {
-        throw new InvalidDataError(`Period type should be Studying, MilitaryService, Working, Entrepreneurship, CareerBreak`);
+        throw new InvalidDataError(`Period type should be Studying, MilitaryService, Working, Entrepreneurship, or CareerBreak`);
     }
     if (!isStartValid(dto)) {
-        throw new InvalidDataError(`Period start date should be greater ${minDate}`);
+        throw new InvalidDataError(`Period start date should be greater ${minDate} and less than current ttime`);
     }
     if (!isFinishValid(dto)) {
-        throw new InvalidDataError(`Period finish date should be greater than start date ${dto.start}`);
+        throw new InvalidDataError(`Period finish date should be greater than start date ${dto.start} and less than current time`);
     }
     if (!isRemarkValid(dto)) {
         throw new InvalidDataError(`Remark should not be empty string data and at least of ${remarkMinLength} characters`);
@@ -86,29 +86,53 @@ const validatePeriod = async (dto: PeriodSaveDto): Promise<void> => {
 };
 
 const isPersonIdValid = (dto: PeriodSaveDto): boolean => {
-    return dto.personId !== undefined && typeof dto.personId === "number";
+    if (dto.personId) {
+        return typeof dto.personId === "number";
+    }
+    return false;
 }
 
 const isPeriodTypeValid = (dto: PeriodSaveDto): boolean => {
-    return dto.periodType !== undefined && typeof dto.periodType === "string";
+    if (dto.periodType) {
+        return (
+            typeof dto.periodType === "string" &&
+            [
+                "Studying",
+                "MilitaryService",
+                "Working",
+                "Entrepreneurship",
+                "CareerBreak"].
+                findIndex(value => value === dto.periodType) !== -1
+        );
+    }
+    return false;
 }
 
 const isStartValid = (dto: PeriodSaveDto): boolean => {
-    if (dto.start === undefined) {
-        return false;
+    if (dto.start) {
+        return (
+            minDate.getTime() <= dto.start.getTime() &&
+            dto.start.getTime() <= new Date().getTime()
+        )
     }
-    return dto.start.getTime() > minDate.getTime();
+    return false;
 }
 
 const isFinishValid = (dto: PeriodSaveDto): boolean => {
-    if (dto.finish === undefined || dto.start === undefined) {
-        return false;
+    if (dto.start && dto.finish) {
+        return (
+            dto.start.getTime() < dto.finish.getTime() &&
+            dto.finish.getTime() <= new Date().getTime()
+        )
     }
-    return dto.finish.getTime() > dto.start.getTime();
+    return false;
 }
 
 const isRemarkValid = (dto: PeriodSaveDto): boolean => {
-    return dto.remark === undefined || (dto.remark.trim().length >= remarkMinLength);
+    if (dto.remark) {
+        return dto.remark.trim().length >= remarkMinLength;
+    }
+    return false;
 }
 
 const personIsPresent = async (dto: PeriodSaveDto): Promise<boolean> => {

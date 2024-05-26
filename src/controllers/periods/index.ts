@@ -24,7 +24,7 @@ export const getPeriodsForPersonSortedByTimeDesc = async (request: Request, resp
     try {
         const queryDto = createPeriodQueryDto(request);
         const periodList = await getPeriodsForPersonSortedByTimeDescApi(queryDto);
-        response.send({ periodList });
+        response.send(periodList);
     } catch (error) {
         const { message, status } = new InternalError(error);
         log4js.getLogger().error(`Cannot retrieve list of periods for person id ${request.params.personId}`, error);
