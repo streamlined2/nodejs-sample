@@ -44,17 +44,6 @@ const period3 = new PeriodModel(
     }
 );
 
-const periodForSearch = new PeriodModel(
-    {
-        _id: new ObjectId(),
-        personId: personId,
-        periodType: "MilitaryService",
-        start: new Date("2017-01-01"),
-        finish: new Date("2019-01-01"),
-        remark: "private"
-    }
-);
-
 describe('Period Service', () => {
     before(async () => {
         await mongoSetup;
@@ -62,7 +51,6 @@ describe('Period Service', () => {
         await period1.save();
         await period2.save();
         await period3.save();
-        await periodForSearch.save();
     });
 
     afterEach(() => {
@@ -94,11 +82,11 @@ describe('Period Service', () => {
     });
 
     it('getPeriodsForPersonSortedByTimeDesc should provide a list of periods for given personId sorted by start date in descending order', (done) => {
-        const savedPeriods = [period1, period2, period3].map(periodService.toPeriodDto);
-        periodService.getPeriodsForPersonSortedByTimeDesc({ personId, from: 0, size: 10 })
+        const resultingPeriods = [period2, period1].map(periodService.toPeriodDto);
+        periodService.getPeriodsForPersonSortedByTimeDesc({ personId: personId, from: 0, size: 10 })
             .then((periods) => {
                 expect(periods.length).to.equal(2);
-                expect(periods).to.eql(savedPeriods);
+                expect(periods).to.eql(resultingPeriods);
                 done();
             })
             .catch((error: Error) => done(error));
