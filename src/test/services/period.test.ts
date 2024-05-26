@@ -6,6 +6,8 @@ import PeriodModel from 'src/model/period';
 import { PeriodSaveDto } from 'src/dto/period/periodSaveDto';
 import * as periodService from 'src/services/period';
 import httpStatus from 'http-status';
+import { defaultPersonEndpoint } from 'src/services/period';
+import { consulServer } from 'src/app';
 
 const { expect } = chai;
 
@@ -59,11 +61,12 @@ describe('Period Service', () => {
     });
 
     it("savePeriod should create new period and return it's id", (done) => {
-        const fetchStub = sandbox.stub(global, 'fetch');
-        fetchStub.resolves(mockAPIResponse());
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse());
+        sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
 
+        const strayPersonId = 1000;
         const periodDto: PeriodSaveDto = {
-            personId: personId,
+            personId: strayPersonId,
             periodType: "MilitaryService",
             start: new Date("2000-01-01"),
             finish: new Date("2010-01-01"),
@@ -86,7 +89,7 @@ describe('Period Service', () => {
     });
 
     const mockAPIResponse = (body = {}) => {
-        return new global.Response(
+        return new Response(
             JSON.stringify(body),
             {
                 status: httpStatus.OK,

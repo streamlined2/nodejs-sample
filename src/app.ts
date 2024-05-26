@@ -12,7 +12,7 @@ if (String(process.env.NODE_ENV).trim() === 'dev') {
   env = 'dev';
 }
 
-const consulServer = new Consul(config.consul.server[env] as ConsulOptions);
+export const consulServer = new Consul(config.consul.server[env] as ConsulOptions);
 
 const prefix = `config/${config.consul.service.name}`;
 

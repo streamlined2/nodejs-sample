@@ -10,7 +10,7 @@ import { PeriodDto } from 'src/dto/period/periodDto';
 import { PeriodQueryDto } from 'src/dto/period/periodQueryDto';
 import { PeriodCountRequestDto } from 'src/dto/period/periodCountRequestDto';
 
-const defaultPersonEndpoint = 'http://localhost:8080/api/person/';
+export const defaultPersonEndpoint = 'http://localhost:8080/api/person/';
 const firstCount = 0;
 const numberOfCounts = 1000;
 
