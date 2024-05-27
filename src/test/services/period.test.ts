@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { ObjectId } from 'mongodb';
 import mongoSetup from '../mongoSetup';
 import PeriodModel, { Period } from 'src/model/period';
-import { PeriodSaveDto } from 'src/dto/period/periodSaveDto';
+import { minDate, PeriodSaveDto, remarkMinLength } from 'src/dto/period/periodSaveDto';
 import * as periodService from 'src/services/period';
 import httpStatus from 'http-status';
 import { defaultPersonEndpoint } from 'src/services/period';
@@ -64,7 +64,7 @@ describe('Period Service', () => {
     });
 
     it("savePeriod should create new period and return it's id", (done) => {
-        sandbox.stub(global, 'fetch').resolves(mockAPIResponse());
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.OK));
         sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
 
         const strayPersonId = 1000;
@@ -93,15 +93,111 @@ describe('Period Service', () => {
             .catch((error: Error) => done(error));
     });
 
-    const mockAPIResponse = (body = {}) => {
+    const mockAPIResponse = (statusCode: number, body = {}) => {
         return new Response(
             JSON.stringify(body),
             {
-                status: httpStatus.OK,
+                status: statusCode,
                 headers: { 'Content-type': 'application/json' }
             }
         );
     };
+
+    it("savePeriod should return error if person id not found", (done) => {
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.NOT_FOUND));
+        sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
+
+        const strayPersonId = 1000;
+        const periodDto: PeriodSaveDto = {
+            personId: strayPersonId,
+            periodType: "MilitaryService",
+            start: new Date("2000-01-01"),
+            finish: new Date("2010-01-01"),
+            remark: "private"
+        };
+        periodService.savePeriod(periodDto)
+            .then(async (message) => {
+                done("Should not happen");
+            })
+            .catch((error: Error) => {
+                const { message } = error;
+                expect(message).to.eql("No person present with id " + strayPersonId);
+                done();
+            }
+            );
+    });
+
+    it("savePeriod should return error if start date less than minDate", (done) => {
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.NOT_FOUND));
+        sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
+
+        const strayPersonId = 1000;
+        const periodDto: PeriodSaveDto = {
+            personId: strayPersonId,
+            periodType: "MilitaryService",
+            start: new Date("1900-01-01"),
+            finish: new Date("2010-01-01"),
+            remark: "private"
+        };
+        periodService.savePeriod(periodDto)
+            .then(async (message) => {
+                done("Should not happen");
+            })
+            .catch((error: Error) => {
+                const { message } = error;
+                expect(message).to.eql(`Period start date should be greater ${minDate} and less than current ttime`);
+                done();
+            }
+            );
+    });
+
+    it("savePeriod should return error if finish date less than start date", (done) => {
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.NOT_FOUND));
+        sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
+
+        const strayPersonId = 1000;
+        const periodDto: PeriodSaveDto = {
+            personId: strayPersonId,
+            periodType: "MilitaryService",
+            start: new Date("2000-01-01"),
+            finish: new Date("1990-01-01"),
+            remark: "private"
+        };
+        periodService.savePeriod(periodDto)
+            .then(async (message) => {
+                done("Should not happen");
+            })
+            .catch((error: Error) => {
+                const { message } = error;
+                expect(message).to.eql(`Period finish date should be greater than start date ${periodDto.start} and less than current time`);
+                done();
+            }
+            );
+    });
+    
+    it("savePeriod should return error if finish date less than start date", (done) => {
+        sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.NOT_FOUND));
+        sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
+
+        const strayPersonId = 1000;
+        const periodDto: PeriodSaveDto = {
+            personId: strayPersonId,
+            periodType: "MilitaryService",
+            start: new Date("2000-01-01"),
+            finish: new Date("2010-01-01"),
+            remark: "AB"
+        };
+        periodService.savePeriod(periodDto)
+            .then(async (message) => {
+                done("Should not happen");
+            })
+            .catch((error: Error) => {
+                const { message } = error;
+                expect(message).to.eql(`Remark should not be empty string data and at least of ${remarkMinLength} characters`);
+                done();
+            }
+            );
+    });
 
     it('getPeriodsForPersonSortedByTimeDesc should provide a list of periods for given personId sorted by start date in descending order', (done) => {
         const resultingPeriods = [periods[1], periods[0]].map(periodService.toPeriodDto);
