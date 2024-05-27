@@ -12,7 +12,7 @@ export const savePeriod = async (request: Request, response: Response) => {
     try {
         const dto = new PeriodSaveDto(request.body);
         const id = await savePeriodApi(dto);
-        response.status(httpStatus.CREATED).send({ id });
+        response.status(httpStatus.CREATED).send({ _id: id });
     } catch (error) {
         const { message, status } = new InternalError(error);
         log4js.getLogger().error('Cannot save period', error);

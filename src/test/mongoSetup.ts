@@ -29,7 +29,7 @@ const connectionPromise = new Promise((resolve, reject) => {
 
       return null;
     })
-    .catch((err) => {
+    .catch(err => {
       console.error('Error in prepareStorage');
       console.error(err);
       reject(err);

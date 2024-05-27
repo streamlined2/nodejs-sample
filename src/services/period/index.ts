@@ -49,6 +49,14 @@ export const toPeriodDto = (period: Period) => ({
     remark: period.remark
 });
 
+export const toPeriodDtoDateAsString = (period: Period) => ({
+    personId: period.personId,
+    periodType: period.periodType,
+    start: period.start.toISOString(),
+    finish: period.finish.toISOString(),
+    remark: period.remark
+});
+
 export const savePeriod = async (
     dto: PeriodSaveDto): Promise<string> => {
     await validatePeriod(dto);

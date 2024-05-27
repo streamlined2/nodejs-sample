@@ -2,7 +2,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import { ObjectId } from 'mongodb';
 import mongoSetup from '../mongoSetup';
-import PeriodModel from 'src/model/period';
+import PeriodModel, { Period } from 'src/model/period';
 import { PeriodSaveDto } from 'src/dto/period/periodSaveDto';
 import * as periodService from 'src/services/period';
 import httpStatus from 'http-status';
@@ -15,45 +15,48 @@ const sandbox = sinon.createSandbox();
 
 const personId = 1;
 const otherPersonId = 2;
-const period1 = new PeriodModel(
-    {
-        _id: new ObjectId(),
-        personId: personId,
-        periodType: "Studying",
-        start: new Date("2012-01-01"),
-        finish: new Date("2017-01-01"),
-        remark: "elementary school"
-    }
-);
 
-const period2 = new PeriodModel(
-    {
-        _id: new ObjectId(),
-        personId: personId,
-        periodType: "MilitaryService",
-        start: new Date("2017-01-01"),
-        finish: new Date("2019-01-01"),
-        remark: "private"
-    }
-);
-
-const period3 = new PeriodModel(
-    {
-        _id: new ObjectId(),
-        personId: otherPersonId,
-        periodType: "Working",
-        start: new Date("2010-01-01"),
-        finish: new Date("2020-01-01")
-    }
-);
+const periods: Array<Period> = [
+    new PeriodModel(
+        {
+            _id: new ObjectId(),
+            personId: personId,
+            periodType: "Studying",
+            start: new Date("2012-01-01"),
+            finish: new Date("2017-01-01"),
+            remark: "elementary school"
+        }
+    ),
+    new PeriodModel(
+        {
+            _id: new ObjectId(),
+            personId: personId,
+            periodType: "MilitaryService",
+            start: new Date("2017-01-01"),
+            finish: new Date("2019-01-01"),
+            remark: "private"
+        }
+    ),
+    new PeriodModel(
+        {
+            _id: new ObjectId(),
+            personId: otherPersonId,
+            periodType: "Working",
+            start: new Date("2010-01-01"),
+            finish: new Date("2020-01-01")
+        }
+    )
+];
 
 describe('Period Service', () => {
     before(async () => {
         await mongoSetup;
 
-        await period1.save();
-        await period2.save();
-        await period3.save();
+        periods.forEach(async (period) => await period.save());
+    });
+
+    after(async () => {
+        periods.forEach(async (period) => await period.deleteOne());
     });
 
     afterEach(() => {
@@ -83,6 +86,8 @@ describe('Period Service', () => {
                 expect(period?.finish).to.eql(periodDto.finish);
                 expect(period?.remark).to.eql(periodDto.remark);
 
+                period?.deleteOne();
+
                 done();
             })
             .catch((error: Error) => done(error));
@@ -99,10 +104,9 @@ describe('Period Service', () => {
     };
 
     it('getPeriodsForPersonSortedByTimeDesc should provide a list of periods for given personId sorted by start date in descending order', (done) => {
-        const resultingPeriods = [period2, period1].map(periodService.toPeriodDto);
+        const resultingPeriods = [periods[1], periods[0]].map(periodService.toPeriodDto);
         periodService.getPeriodsForPersonSortedByTimeDesc({ personId: personId, from: 0, size: 10 })
             .then((periods) => {
-                expect(periods.length).to.equal(2);
                 expect(periods).to.eql(resultingPeriods);
                 done();
             })
