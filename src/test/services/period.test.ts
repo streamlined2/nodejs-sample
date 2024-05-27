@@ -175,7 +175,7 @@ describe('Period Service', () => {
             );
     });
     
-    it("savePeriod should return error if finish date less than start date", (done) => {
+    it("savePeriod should return error if remark is non-empty and shorter than minimum length", (done) => {
         sandbox.stub(global, 'fetch').resolves(mockAPIResponse(httpStatus.NOT_FOUND));
         sandbox.stub(consulServer.kv, 'get').resolves(defaultPersonEndpoint);
 
